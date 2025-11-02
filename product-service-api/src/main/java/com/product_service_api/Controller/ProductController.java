@@ -30,6 +30,7 @@ public class ProductController {
     public ResponseEntity<?> findAllProducts() {
         if (authServiceClient.IsUser()) {
             try {
+                System.out.println("Got Save request");
                 return new ResponseEntity<>(productService.findAllProducts(), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Error", HttpStatus.NOT_FOUND);
@@ -56,6 +57,7 @@ public class ProductController {
     public ResponseEntity<?> saveProduct(@RequestBody Product product) {
         if (authServiceClient.isAdmin()) {
             try {
+                System.out.println("got save req");
                 return new ResponseEntity<>(productService.saveProduct(product), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);

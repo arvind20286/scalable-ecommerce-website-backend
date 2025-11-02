@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
             order.setOrderStatus(StatusOrder.PROCESSING);
             return orderRepository.save(order);
         } else {
-            throw new RuntimeException("Orden no encontrada con ID: " + orderId);
+            throw new RuntimeException("Order not found with given order id: " + orderId);
         }
     }
 
@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
             order.setOrderStatus(StatusOrder.COMPLETED);
             return orderRepository.save(order);
         } else {
-            throw new RuntimeException("Orden no encontrada con ID: " + orderId);
+            throw new RuntimeException("Order not found with given order id: " + orderId);
         }
     }
 

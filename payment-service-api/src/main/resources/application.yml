@@ -13,4 +13,4 @@ paypal:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-service-api:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/

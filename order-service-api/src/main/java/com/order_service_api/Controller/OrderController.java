@@ -28,7 +28,7 @@ public class OrderController {
             Order newOrder = orderService.createOrder(idUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear la orden: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating order: " + e.getMessage());
         }
     }
 

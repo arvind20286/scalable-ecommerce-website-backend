@@ -27,7 +27,7 @@ public class ShoppingController {
             Cart cart = shoppingService.AddToCart(request.getIdUser(), request.getIdProduct(), request.getQuantity());
             return new ResponseEntity<>(cart, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error al añadir producto al carrito: " + e.getMessage(),
+            return new ResponseEntity<>("Error adding product to cart: " + e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
     }
@@ -38,7 +38,7 @@ public class ShoppingController {
             Cart cart = shoppingService.RemoveToCart(request.getIdUser(), request.getIdProduct());
             return new ResponseEntity<>(cart, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error al remover producto del carrito: " + e.getMessage(),
+            return new ResponseEntity<>("Error removing product from cart: " + e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
     }
@@ -49,7 +49,7 @@ public class ShoppingController {
             Cart cart = shoppingService.sendCart(idUser);
             return new ResponseEntity<>(cart, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error al enviar el carrito: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error sending cart: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
