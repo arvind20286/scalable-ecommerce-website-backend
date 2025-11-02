@@ -27,7 +27,7 @@ public class ShoppingServiceImpl implements ShoppingService {
 
         ProductDTO product = productServiceClient.findProductById(idProduct);
         if (product == null) {
-            throw new IllegalArgumentException("El producto no existe.");
+            throw new IllegalArgumentException("Error Product does not exists.");
         }
 
         Cart cart = cartRepository.findByIdUser(idUser);
@@ -37,7 +37,7 @@ public class ShoppingServiceImpl implements ShoppingService {
             UserDTO user = userServiceClient.getUserById(idUser);
 
             if (user == null) {
-                throw new IllegalArgumentException("El usuario no existe.");
+                throw new IllegalArgumentException("Error User not exists.");
             }
 
             if (cart == null) {
@@ -74,7 +74,7 @@ public class ShoppingServiceImpl implements ShoppingService {
                     .sum();
             cart.setTotal(newTotal);
         } else {
-            throw new IllegalArgumentException("Stock insuficiente.");
+            throw new IllegalArgumentException("Stock insufficient.");
         }
 
         return cartRepository.save(cart);
@@ -84,14 +84,14 @@ public class ShoppingServiceImpl implements ShoppingService {
     public Cart RemoveToCart(Long idUser, Long idProduct) {
         Cart cart = cartRepository.findByIdUser(idUser);
         if (cart == null) {
-            throw new IllegalArgumentException("El carrito del usuario no existe.");
+            throw new IllegalArgumentException("Error no Product added to cart");
         }
         CartItem itemToDelete = cart.getCartItems().stream()
                 .filter(item -> item.getIdProduct().equals(idProduct))
                 .findFirst()
                 .orElse(null);
         if (itemToDelete == null) {
-            throw new IllegalArgumentException("El producto no está en el carrito.");
+            throw new IllegalArgumentException("Error no Such Product in The Cart");
         }
         cart.getCartItems().remove(itemToDelete);
         Double newTotal = cart.getCartItems().stream()
