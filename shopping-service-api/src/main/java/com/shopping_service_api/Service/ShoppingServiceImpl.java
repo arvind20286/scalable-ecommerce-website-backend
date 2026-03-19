@@ -24,12 +24,12 @@ public class ShoppingServiceImpl implements ShoppingService {
 
     @Override
     public Cart AddToCart(Long idUser, Long idProduct, Integer quantity) {
-
+        System.out.println(idProduct);
         ProductDTO product = productServiceClient.findProductById(idProduct);
         if (product == null) {
             throw new IllegalArgumentException("Error Product does not exists.");
         }
-
+        System.out.println(product);
         Cart cart = cartRepository.findByIdUser(idUser);
 
         Integer stock = product.getStock();
@@ -110,12 +110,5 @@ public class ShoppingServiceImpl implements ShoppingService {
         return cartToSend;
     }
 
-    @Override
-    public void clearCart(Long idUser) {
-        Cart cart = cartRepository.findByIdUser(idUser);
-        cart.setTotal(0.0);
-        cart.getCartItems().clear();
-        cartRepository.save(cart);
-        }
 }
 

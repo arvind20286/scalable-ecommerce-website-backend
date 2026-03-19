@@ -15,7 +15,7 @@ import com.user_service_api.models.dtos.RegisterDTO;
 import com.user_service_api.services.AuthService;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

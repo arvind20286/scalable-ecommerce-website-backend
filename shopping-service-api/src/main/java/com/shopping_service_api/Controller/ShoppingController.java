@@ -53,8 +53,4 @@ public class ShoppingController {
         }
     }
 
-    @GetMapping("/clear-cart/{idUser}")
-    public void cleanCart(@PathVariable Long idUser){
-        shoppingService.clearCart(idUser);
-    }
 }

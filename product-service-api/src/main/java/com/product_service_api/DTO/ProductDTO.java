@@ -1,16 +1,19 @@
-package com.shopping_service_api.Model.dto;
+package com.product_service_api.DTO;
 
+import com.product_service_api.Entity.Product;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ProductDTO {
     private Long id;
     private String name;
@@ -18,5 +21,4 @@ public class ProductDTO {
     private Double price;
     private String category;
     private Integer stock;
-    private List<ProductImages> images;
 }

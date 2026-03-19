@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 import com.payment_service_api.Feign.Client.NotificationClient;
 import com.payment_service_api.Model.dto.OrderDTO;
 import com.payment_service_api.Model.dto.PayDTO;
@@ -40,17 +42,19 @@ public class PaymentController {
     }
 
     @PostMapping("/payment/create")
+    @CircuitBreaker(name = "paypalError", fallbackMethod = "paypalError")
     public RedirectView createPayment(
             @RequestParam("orderid") Long orderId,
             @RequestParam("method") String method,
             @RequestParam("amount") String amount,
             @RequestParam("currency") String currency,
             @RequestParam("description") String description) {
+        String amounts = amount.replace(',', '.');
+        String cancelUrl = "http://localhost:8084/payment/cancel";
+        String successUrl = String.format("http://localhost:8084/payment/success/%d", orderId);
+        Payment payment = null;
         try {
-            String amounts = amount.replace(',', '.');
-            String cancelUrl = "http://localhost:8084/payment/cancel";
-            String successUrl = String.format("http://localhost:8084/payment/success/%d", orderId);
-            Payment payment = paymentService.createPayment(
+            payment = paymentService.createPayment(
                     orderId,
                     Double.valueOf(amounts),
                     currency,
@@ -59,16 +63,20 @@ public class PaymentController {
                     description,
                     cancelUrl,
                     successUrl);
-
-            for (Links links : payment.getLinks()) {
-                if (links.getRel().equals("approval_url")) {
-                    return new RedirectView(links.getHref());
-                }
-            }
         } catch (PayPalRESTException e) {
-            log.error("Error occurred:: ", e);
+            throw new RuntimeException(e);
+        }
+
+        for (Links links : payment.getLinks()) {
+            if (links.getRel().equals("approval_url")) {
+                return new RedirectView(links.getHref());
+            }
         }
         return new RedirectView("/payment/error");
+    }
+
+    public String paypalError(Throwable throwable) {
+        return "Could not connect with paypal";
     }
 
     @GetMapping("/payment/success/{orderId}")

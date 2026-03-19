@@ -1,6 +1,8 @@
 package com.product_service_api.Authorization.Client;
 
+import com.product_service_api.DTO.UserIdDTO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.product_service_api.Authorization.Config.FeignConfig;
@@ -12,4 +14,7 @@ public interface AuthServiceClient {
 
     @GetMapping("/api/users/user/verification")
     boolean IsUser();
+
+    @GetMapping("/api/users/client/user-id")
+    UserIdDTO getUserIdJWT();
 }

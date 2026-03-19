@@ -1,6 +1,8 @@
 package com.user_service_api.controllers;
 
 import java.util.List;
+
+import com.user_service_api.models.dtos.UserIdDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,7 +17,7 @@ import com.user_service_api.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("/api/users")
 @Slf4j
 public class UserController {
 
@@ -42,6 +44,18 @@ public class UserController {
         try {
             User user = userService.getUserById(id);
             return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            log.error("ERROR", e);
+            return null;
+        }
+    }
+
+    @GetMapping("/client/user-id")
+    @PreAuthorize("hasAuthority('CLIENT')")
+    public ResponseEntity<UserIdDTO> getUserIdJWT(){
+        try {
+            UserIdDTO userIdDTO = userService.getUserIdJWT();
+            return ResponseEntity.ok(userIdDTO);
         } catch (Exception e) {
             log.error("ERROR", e);
             return null;

@@ -1,7 +1,10 @@
 package com.user_service_api.services.impl;
 
 import java.util.List;
+
+import com.user_service_api.models.dtos.UserIdDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.user_service_api.models.entities.User;
@@ -39,5 +42,11 @@ public class UserServiceImpl implements UserService{
         
     }
 
-    
+    @Override
+    public UserIdDTO getUserIdJWT() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new UserIdDTO(user.getId());
+    }
+
+
 }
