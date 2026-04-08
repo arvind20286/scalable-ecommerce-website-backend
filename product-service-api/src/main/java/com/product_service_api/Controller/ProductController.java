@@ -2,9 +2,11 @@ package com.product_service_api.Controller;
 
 import java.util.List;
 
+import com.product_service_api.DTO.BrandRequestDTO;
 import com.product_service_api.DTO.ReviewRequestDTO;
 import com.product_service_api.Entity.ProductImages;
 import com.product_service_api.Entity.Review;
+import com.product_service_api.Exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,12 +54,26 @@ public class ProductController {
         }
     }
 
+//    @PostMapping("/save")
+//    public ResponseEntity<?> saveProduct(@ModelAttribute Product product, @RequestParam("images-files") List<MultipartFile> images) {
+//        if (authServiceClient.isAdmin()) {
+//            try {
+//                System.out.println("got save req");
+//                return new ResponseEntity<>(productService.saveProduct(product, images), HttpStatus.OK);
+//            } catch (Exception e) {
+//                return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);
+//            }
+//        } else {
+//            return null;
+//        }
+//    }
+
     @PostMapping("/save")
-    public ResponseEntity<?> saveProduct(@ModelAttribute Product product, @RequestParam("images-files") List<MultipartFile> images) {
+    public ResponseEntity<?> saveProduct(@RequestBody Product product) {
         if (authServiceClient.isAdmin()) {
             try {
-                System.out.println("got save req");
-                return new ResponseEntity<>(productService.saveProduct(product, images), HttpStatus.OK);
+                System.out.println(product);
+                return new ResponseEntity<>(HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);
             }
@@ -88,6 +104,16 @@ public class ProductController {
             }
         } else {
             return null;
+        }
+    }
+
+    @PostMapping("/register/brand")
+    public ResponseEntity<?> registerBrand(@RequestBody BrandRequestDTO brandRequestDTO){
+        if(authServiceClient.isAdmin()){
+            return new ResponseEntity<>(productService.registerBrand(brandRequestDTO), HttpStatus.OK);
+        }
+        else{
+            throw new BadRequestException("User not allowed to do this operation");
         }
     }
 

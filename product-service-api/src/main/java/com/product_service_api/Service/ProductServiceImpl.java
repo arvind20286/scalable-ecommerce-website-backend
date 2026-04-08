@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.DTO.BrandRequestDTO;
 import com.product_service_api.DTO.ReviewRequestDTO;
+import com.product_service_api.Entity.Brand;
 import com.product_service_api.Entity.ProductImages;
 import com.product_service_api.Entity.Review;
+import com.product_service_api.Exceptions.BadRequestException;
+import com.product_service_api.Repository.BrandRepository;
 import com.product_service_api.Repository.ProductImagesRepository;
 import com.product_service_api.Repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
     private final AuthServiceClient authServiceClient;
     private final S3Client s3Client;
@@ -101,6 +106,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Brand registerBrand(BrandRequestDTO brandRequestDTO){
+
+        if(brandRepository.existsByBrandName(brandRequestDTO.getBrandName())){
+            throw new BadRequestException("Brand Name Already Exists");
+        }
+        Brand brand = new Brand();
+        brand.setBrandName(brandRequestDTO.getBrandName());
+        brand.setBrandDescription(brandRequestDTO.getBrandDescription());
+        brandRepository.save(brand);
+        return brand;
+    }
+
+    @Override
     public Review addProductReview(ReviewRequestDTO reviewRequestDTO) {
         Long userId = authServiceClient.getUserIdJWT().getUserId();
         if(!productRepository.existsById(reviewRequestDTO.getProductId()) || reviewRepository.existsByUserIdAndProductId(userId, reviewRequestDTO.getProductId())){
@@ -124,8 +142,8 @@ public class ProductServiceImpl implements ProductService {
     public Product updateStockProduct(Long idProduct, Integer sale) {
         try {
             Product product = productRepository.findById(idProduct).get();
-            Integer stock = product.getStock();
-            product.setStock(stock-sale);
+//            Integer stock = product.getStock();
+//            product.setStock(stock-sale);
             return productRepository.save(product);
         } catch (Exception e) {
             return null;

@@ -26,15 +26,17 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Double price;
+    @ManyToOne
+    private Brand brand;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Category category;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductItem> productItems;
 
-    @Column(nullable = false)
-    private Integer stock;
+    @ManyToOne
+    private ProductCategory productCategory;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductAttribute> productAttributeList;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -43,10 +45,6 @@ public class Product {
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> reviews;
-
-    public enum Category {
-        AAA, AA, A
-    }
 
 }
 
