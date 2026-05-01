@@ -17,4 +17,16 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), "Bad Request", LocalDateTime.now(), HttpStatusCode.valueOf(400));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex){
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), "Forbidden", LocalDateTime.now(), HttpStatusCode.valueOf(403));
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex){
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), "Conflict", LocalDateTime.now(), HttpStatusCode.valueOf(HttpStatus.CONFLICT.value()));
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
 }

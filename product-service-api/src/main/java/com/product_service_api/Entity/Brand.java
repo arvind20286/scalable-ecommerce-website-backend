@@ -1,5 +1,6 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,5 +24,6 @@ public class Brand {
     private String brandDescription;
 
     @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Product> productList;
 }

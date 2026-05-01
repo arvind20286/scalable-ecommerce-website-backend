@@ -1,5 +1,7 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +23,7 @@ public class ProductCategory {
     private String category;
 
     @ManyToOne
+    @JsonBackReference("sizeCategory-productCategory")
     private SizeCategory sizeCategory;
 
     @Column
@@ -28,12 +31,14 @@ public class ProductCategory {
 
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
+    @JsonBackReference("parent-sub-categories")
     private ProductCategory parentCategoryId;
 
     @OneToMany(mappedBy = "parentCategoryId", cascade = CascadeType.ALL)
+    @JsonManagedReference("parent-sub-categories")
     private List<ProductCategory> subCategories;
 
     @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL)
+    @JsonManagedReference("category-products")
     private List<Product> productsList;
-
 }

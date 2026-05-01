@@ -1,5 +1,6 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,5 +22,6 @@ public class Colour {
     private String colourName;
 
     @OneToMany(mappedBy = "colour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ProductItem> productItemsList;
 }

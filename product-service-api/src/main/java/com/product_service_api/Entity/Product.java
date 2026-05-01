@@ -1,5 +1,6 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,13 +28,15 @@ public class Product {
     private String description;
 
     @ManyToOne
+    @JsonBackReference
     private Brand brand;
+
+    @ManyToOne
+    @JsonBackReference
+    private ProductCategory productCategory;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductItem> productItems;
-
-    @ManyToOne
-    private ProductCategory productCategory;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductAttribute> productAttributeList;

@@ -1,5 +1,6 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,9 +18,10 @@ public class AttributeType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private String attributeName;
 
     @OneToMany(mappedBy = "attributeType", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<AttributeOption> attributeOptionList;
 }

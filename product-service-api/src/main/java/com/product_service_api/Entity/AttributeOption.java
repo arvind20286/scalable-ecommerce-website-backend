@@ -1,5 +1,7 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +23,10 @@ public class AttributeOption {
     private String name;
 
     @OneToMany(mappedBy = "attributeOption", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ProductAttribute> productAttributeList;
 
     @ManyToOne
+    @JsonBackReference
     private AttributeType attributeType;
 }

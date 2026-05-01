@@ -1,5 +1,7 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +26,7 @@ public class SizeCategory {
     @OneToMany(mappedBy = "sizeCategory")
     private List<ProductCategory> productCategories;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "sizeCategory", cascade = CascadeType.ALL)
     private List<SizeOption> sizeOptionList;
 }

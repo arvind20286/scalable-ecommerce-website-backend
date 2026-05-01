@@ -64,13 +64,17 @@ public class UserController {
 
     @GetMapping("/admin/verification")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public boolean IsAdmin() {
+    public boolean isAdmin() {
         return true;
     }
 
+    @GetMapping("/seller/verification")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public boolean isSeller(){return true;}
+
     @GetMapping("/client/verification")
     @PreAuthorize("hasAuthority('CLIENT')")
-    public boolean IsClient() {
+    public boolean isClient() {
         return true;
     }
 
