@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.user_service_api.models.dtos.UserIdDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
 
     @Override
+    @Cacheable(value = "users", key = "#id", unless = "#result == null")
     public User getUserById(Long id) throws Exception{
         try {
             return userRepository.findById(id).get();
@@ -29,6 +31,20 @@ public class UserServiceImpl implements UserService{
             return null;
         }
         
+    }
+
+    @Override
+    @Cacheable(value = "users", key = "#email", unless = "#result == null")
+    public User getUserByEmail(String email) throws Exception {
+        try {
+            return userRepository.findByEmail(email).orElseThrow(
+                    () -> new Exception("User not found")
+            );
+        }
+        catch (Exception e) {
+            log.error("----------USER NOT FOUND----------", e);
+            return null;
+        }
     }
 
     @Override

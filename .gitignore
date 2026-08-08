@@ -1,2 +1,47 @@
-**/application-*.yml
-**/application.yml
+# Secrets and credentials
+.env
+.env.*                # environment overrides
+**/application-*.yml  # (already present)
+**/application.yml    # (already present)
+*.secret
+**/*secret.yaml       # (already present)
+credentials.yml.enc
+
+# Keys / certs
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+*.csr
+*.der
+*.asc
+
+# SSH private keys
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+id_rsa*
+
+# Docker & cloud credentials
+.docker/config.json
+.aws/credentials
+.aws/config
+gcloud/key.json
+azure/*credentials*
+
+# Common secrets directories
+**/secrets/
+.secrets/
+secrets/**
+
+# Misc (optional but useful)
+*.env.local
+*.keyring
+*.credentials
+
+# OS / editor helpers (optional)
+.DS_Store

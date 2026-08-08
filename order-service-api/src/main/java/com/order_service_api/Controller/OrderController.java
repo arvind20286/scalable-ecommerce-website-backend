@@ -24,12 +24,8 @@ public class OrderController {
 
     @PostMapping("/create/{idUser}")
     public ResponseEntity<?> createOrder(@PathVariable Long idUser) {
-        try {
-            Order newOrder = orderService.createOrder(idUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating order: " + e.getMessage());
-        }
+        Order newOrder = orderService.createOrder(idUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
     }
 
     @GetMapping("/bring/{orderId}")

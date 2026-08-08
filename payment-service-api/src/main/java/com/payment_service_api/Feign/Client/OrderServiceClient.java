@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import com.payment_service_api.Model.dto.OrderDTO;
+import com.payment_service_api.dto.OrderDTO;
 
 @FeignClient(name = "order-service-api")
 public interface OrderServiceClient {

@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.shopping_service_api.Model.dto.UserDTO;
+import com.shopping_service_api.DTO.UserDTO;
 
 @FeignClient(name = "user-service-api")
 public interface UserServiceClient {

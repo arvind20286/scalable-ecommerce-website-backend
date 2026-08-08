@@ -23,7 +23,4 @@ public class Brand {
     @Column
     private String brandDescription;
 
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Product> productList;
 }

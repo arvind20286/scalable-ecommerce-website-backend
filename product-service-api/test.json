@@ -1,0 +1,39 @@
+{
+  "name": "Classic Denim Jacket",
+  "description": "A timeless classic denim jacket for everyday wear.",
+  "brandId": 2,
+  "productCategoryId": 2,
+  "productItemList": [
+    {
+      "originalPrice": 89.99,
+      "salePrice": 75.00,
+      "productCode": "DJ-BLU-01",
+      "colourId": 2,
+      "variationDataList": [
+        { "stock": 150, "sizeOptionId": 7 },
+        { "stock": 85, "sizeOptionId": 8 }
+      ],
+      "imageFilenames": [
+        "denim-jacket-blue-front.jpg",
+        "denim-jacket-blue-back.jpg"
+      ]
+    },
+    {
+      "originalPrice": 89.99,
+      "salePrice": 75.00,
+      "productCode": "DJ-BLK-01",
+      "colourId": 3,
+      "variationDataList": [
+        { "stock": 200, "sizeOptionId": 7 },
+        { "stock": 120, "sizeOptionId": 8 }
+      ],
+      "imageFilenames": [
+        "denim-jacket-black-front.jpg"
+      ]
+    }
+  ],
+  "productAttributeDataList": [
+    { "attributeOptionId": 3 },
+    { "attributeOptionId": 2 }
+  ]
+}

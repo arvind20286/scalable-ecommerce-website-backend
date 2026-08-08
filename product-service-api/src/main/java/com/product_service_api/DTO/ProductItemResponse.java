@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -12,9 +14,10 @@ import lombok.NoArgsConstructor;
 public class ProductItemResponse {
 
     private Long id;
-    private String sku;
-    private Integer quantityInStock;
+    private Long productId;
+    private String productCode;
     private Double salePrice;
     private Double originalPrice;
-
+    private Long colourId;
+    private List<VariationData> variationDataList;
 }

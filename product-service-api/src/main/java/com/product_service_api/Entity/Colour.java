@@ -21,7 +21,4 @@ public class Colour {
     @Column(unique = true, nullable = false)
     private String colourName;
 
-    @OneToMany(mappedBy = "colour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<ProductItem> productItemsList;
 }

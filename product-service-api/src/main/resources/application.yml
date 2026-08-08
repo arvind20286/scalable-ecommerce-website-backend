@@ -1,0 +1,42 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: product-service-api
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+    max-file-size: 10MB
+    max-request-size: 10MB
+
+springdoc:
+  api-docs:
+    # This moves the JSON generation path
+    path: /api/product/v3/api-docs
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka
+
+aws:
+  accessKey: ${AWS_ACCESS_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  s3:
+    bucket: ecommerce-backend-aws
+    region: eu-north-1
+

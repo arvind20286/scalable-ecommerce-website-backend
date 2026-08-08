@@ -1,5 +1,6 @@
 package com.product_service_api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class ProductVariation {
     private Long stock;
 
     @ManyToOne
+    @JsonBackReference
     private ProductItem productItem;
 
     @ManyToOne

@@ -31,7 +31,5 @@ public class SizeOption {
     @ManyToOne
     private SizeCategory sizeCategory;
 
-    @OneToMany(mappedBy = "sizeOption", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductVariation> productVariationList;
 
 }

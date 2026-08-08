@@ -3,7 +3,8 @@ package com.order_service_api.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.order_service_api.Exception.BadRequestException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.order_service_api.Client.ShopServiceClient;
@@ -17,25 +18,26 @@ import com.order_service_api.Model.dto.UserDTO;
 import com.order_service_api.Repository.OrderRepository;
 
 @Service
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private UserServiceClient userServiceClient;
-    @Autowired
-    private ShopServiceClient shopServiceClient;
+
+    private final OrderRepository orderRepository;
+    private final UserServiceClient userServiceClient;
+    private final ShopServiceClient shopServiceClient;
 
     @Override
     public Order createOrder(Long idUser) {
-        CartDTO cart = shopServiceClient.sendCart(idUser);
+        CartDTO cart = shopServiceClient.getCart(idUser);
+        if (cart == null || cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
+            throw new BadRequestException("Cart is empty or not found for user with id: " + idUser);
+        }
         UserDTO user = userServiceClient.getUserById(idUser);
         List<OrderItem> OrderItems = cart.getCartItems().stream()
                 .map(cartItem -> OrderItem.builder()
-                        .idProduct(cartItem.getIdProduct())
-                        .nameProduct(cartItem.getNameProduct())
+                        .idProduct(cartItem.getVariationId())
                         .quantity(cartItem.getQuantity())
-                        .unitPrice(cartItem.getUnitPrice())
-                        .totalPrice(Math.round((cartItem.getUnitPrice() * cartItem.getQuantity()) * 100.0) / 100.0)
+                        .unitPrice(cartItem.getPrice())
+                        .totalPrice(Math.round((cartItem.getPrice() * cartItem.getQuantity()) * 100.0) / 100.0)
                         .build())
                 .collect(Collectors.toList());
         Order order = Order.builder()

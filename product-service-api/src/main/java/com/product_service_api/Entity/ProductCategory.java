@@ -30,15 +30,14 @@ public class ProductCategory {
     private String categoryDescription;
 
     @ManyToOne
-    @JoinColumn(name = "parent_category_id")
     @JsonBackReference("parent-sub-categories")
-    private ProductCategory parentCategoryId;
+    private ProductCategory parentCategory;
 
-    @OneToMany(mappedBy = "parentCategoryId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
     @JsonManagedReference("parent-sub-categories")
     private List<ProductCategory> subCategories;
 
-    @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL)
-    @JsonManagedReference("category-products")
-    private List<Product> productsList;
+//    @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL)
+//    @JsonManagedReference("category-products")
+//    private List<Product> productsList;
 }

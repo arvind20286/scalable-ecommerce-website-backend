@@ -1,20 +1,18 @@
 package com.payment_service_api.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 import com.payment_service_api.Feign.Client.NotificationClient;
-import com.payment_service_api.Model.dto.OrderDTO;
-import com.payment_service_api.Model.dto.PayDTO;
+import com.payment_service_api.dto.OrderDTO;
+import com.payment_service_api.dto.PayDTO;
 import com.payment_service_api.Service.PaymentService;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
@@ -28,11 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PaymentController {
 
-    @Autowired
-    private PaymentService paymentService;
+    private final PaymentService paymentService;
 
-    @Autowired
-    private NotificationClient notificationClient;
+    private final NotificationClient notificationClient;
 
     @GetMapping("/{orderId}")
     private String ViewPayment(@PathVariable Long orderId, Model model) {

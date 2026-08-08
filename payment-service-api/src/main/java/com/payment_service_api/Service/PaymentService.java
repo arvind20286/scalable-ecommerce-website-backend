@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Payer;
@@ -12,7 +11,7 @@ import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RedirectUrls;
 import com.payment_service_api.Feign.Client.OrderServiceClient;
-import com.payment_service_api.Model.dto.OrderDTO;
+import com.payment_service_api.dto.OrderDTO;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
@@ -22,8 +21,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class PaymentService {
     private final APIContext apiContext;
-    @Autowired
-    private OrderServiceClient orderServiceClient;
+    private final OrderServiceClient orderServiceClient;
 
     public OrderDTO ViewOrderDetails(Long idOrder){
         OrderDTO orderDTO = orderServiceClient.bringOrder(idOrder);

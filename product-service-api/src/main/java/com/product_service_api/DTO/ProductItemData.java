@@ -15,4 +15,5 @@ public class ProductItemData {
     private String productCode;
     private Long colourId;
     private List<VariationData> variationDataList;
+    private List<String> imageFilenames;
 }

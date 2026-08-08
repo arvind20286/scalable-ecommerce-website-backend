@@ -1,56 +1,47 @@
 package com.shopping_service_api.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.shopping_service_api.Model.entity.Cart;
-import com.shopping_service_api.Model.http.Request;
+import org.springframework.web.bind.annotation.*;
+import com.shopping_service_api.entity.Cart;
+import com.shopping_service_api.DTO.AddToCartRequest;
 import com.shopping_service_api.Service.ShoppingService;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/shopping")
 public class ShoppingController {
 
-    @Autowired
-    private ShoppingService shoppingService;
+    private final ShoppingService shoppingService;
 
-    @PostMapping("/add-to-cart")
-    public ResponseEntity<?> addToCart(@RequestBody Request request) {
-        try {
-            Cart cart = shoppingService.AddToCart(request.getIdUser(), request.getIdProduct(), request.getQuantity());
-            return new ResponseEntity<>(cart, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error adding product to cart: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping
+    public ResponseEntity<?> addToCart(@RequestBody AddToCartRequest request) {
+        Cart cart = shoppingService.addToCart(request.getIdUser(), request.getVariationId());
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
-    @DeleteMapping("/remove-from-cart")
-    public ResponseEntity<?> removeFromCart(@RequestBody Request request) {
-        try {
-            Cart cart = shoppingService.RemoveToCart(request.getIdUser(), request.getIdProduct());
-            return new ResponseEntity<>(cart, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error removing product from cart: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
-        }
+    @PutMapping
+    public ResponseEntity<?> syncCartItem(@RequestBody AddToCartRequest request) {
+        Cart cart = shoppingService.syncCartItem(request.getIdUser(), request.getVariationId(), request.getQuantity());
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
-    @GetMapping("/send-cart/{idUser}")
-    public ResponseEntity<?> sendCart(@PathVariable Long idUser) {
-        try {
-            Cart cart = shoppingService.sendCart(idUser);
-            return new ResponseEntity<>(cart, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error sending cart: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    @DeleteMapping
+    public ResponseEntity<?> removeFromCart(@RequestBody AddToCartRequest request) {
+        Cart cart = shoppingService.removeFromCart(request.getIdUser(), request.getVariationId());
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
+    @GetMapping("/{idUser}")
+    public ResponseEntity<?> getCart(@PathVariable Long idUser) {
+        Cart cart = shoppingService.getCart(idUser);
+        return new ResponseEntity<>(cart, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/clear/{idUser}")
+    public ResponseEntity<?> clearCart(@PathVariable Long idUser) {
+        Cart cart = shoppingService.clearCart(idUser);
+        return new ResponseEntity<>(cart, HttpStatus.OK);
+    }
 }

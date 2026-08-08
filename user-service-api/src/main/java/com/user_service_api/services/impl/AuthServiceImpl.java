@@ -30,14 +30,14 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
 
+    private final UserServiceImpl userService;
+
     @Override
     public AuthDTO login(LoginDTO login) throws Exception {
         try {
             authenticate(login.getEmail(), login.getPassword());
 
-            User user = userRepository.findByEmail(login.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+            User user = userService.getUserByEmail(login.getEmail());
             String token = jwtUtil.generateToken(user);
             return new AuthDTO(token);
         } catch (BadCredentialsException | UsernameNotFoundException e) {

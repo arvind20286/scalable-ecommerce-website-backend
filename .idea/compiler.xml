@@ -8,9 +8,29 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eureka-service-api" />
-        <module name="product-service-api" />
-        <module name="user-service-api" />
         <module name="gateway-service-api" />
+      </profile>
+      <profile name="Annotation profile for product-service-api" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="product-service-api" />
+      </profile>
+      <profile name="Annotation profile for user-service-api" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="payment-service-api" />
+        <module name="order-service-api" />
+        <module name="user-service-api" />
+        <module name="shopping-service-api" />
       </profile>
     </annotationProcessing>
   </component>
@@ -18,7 +38,10 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eureka-service-api" options="-parameters" />
       <module name="gateway-service-api" options="-parameters" />
+      <module name="order-service-api" options="-parameters" />
+      <module name="payment-service-api" options="-parameters" />
       <module name="product-service-api" options="-parameters" />
+      <module name="shopping-service-api" options="-parameters" />
       <module name="user-service-api" options="-parameters" />
     </option>
   </component>
