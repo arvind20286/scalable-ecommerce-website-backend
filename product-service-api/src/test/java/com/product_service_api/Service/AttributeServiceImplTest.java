@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.*;
 import com.product_service_api.Entity.*;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -43,7 +43,7 @@ class AttributeServiceImplTest {
     private AttributeOptionRepository attributeOptionRepository;
 
     @Mock
-    private AuthServiceClient authServiceClient;
+    private GatewayIdentity gatewayIdentity;
 
     @InjectMocks
     private AttributeServiceImpl attributeService;
@@ -113,7 +113,7 @@ class AttributeServiceImplTest {
         ColourRequest request = new ColourRequest();
         request.setColourName("Blue");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(colourRepository.existsByColourNameIgnoreCase("Blue")).thenReturn(false);
         when(colourRepository.save(any(Colour.class))).thenReturn(testColour);
 
@@ -128,7 +128,7 @@ class AttributeServiceImplTest {
     void testAddColour_NotAdmin() {
         ColourRequest request = new ColourRequest();
 
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
 
         assertThatThrownBy(() -> attributeService.addColour(request))
                 .isInstanceOf(ForbiddenException.class);
@@ -140,7 +140,7 @@ class AttributeServiceImplTest {
         ColourRequest request = new ColourRequest();
         request.setColourName("Red");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(colourRepository.existsByColourNameIgnoreCase("Red")).thenReturn(true);
 
         assertThatThrownBy(() -> attributeService.addColour(request))
@@ -154,7 +154,7 @@ class AttributeServiceImplTest {
         SizeCategoryRequest request = new SizeCategoryRequest();
         request.setCategoryName("Shoes");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(sizeCategoryRepository.existsByCategoryName("Shoes")).thenReturn(false);
         when(sizeCategoryRepository.save(any(SizeCategory.class))).thenReturn(testSizeCategory);
 
@@ -172,7 +172,7 @@ class AttributeServiceImplTest {
         request.setSizeCategoryId(1L);
         request.setSizeOrder(2);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(sizeOptionRepository.existsBySizeNameAndSizeCategoryId("M", 1L)).thenReturn(false);
         when(sizeCategoryRepository.getReferenceById(1L)).thenReturn(testSizeCategory);
         when(sizeOptionRepository.save(any(SizeOption.class))).thenReturn(testSizeOption);
@@ -192,7 +192,7 @@ class AttributeServiceImplTest {
         AttributeType attrType = new AttributeType();
         attrType.setId(1L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(attributeTypeRepository.existsByAttributeName("Material")).thenReturn(false);
         when(attributeTypeRepository.save(any(AttributeType.class))).thenReturn(attrType);
 
@@ -212,7 +212,7 @@ class AttributeServiceImplTest {
         AttributeType attrType = new AttributeType();
         attrType.setId(1L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(attributeTypeRepository.existsById(1L)).thenReturn(true);
         when(attributeOptionRepository.existsByNameAndAttributeTypeId("Cotton", 1L)).thenReturn(false);
         when(attributeTypeRepository.getReferenceById(1L)).thenReturn(attrType);
@@ -241,7 +241,7 @@ class AttributeServiceImplTest {
         request.setSizeName("L");
         request.setSizeCategoryId(999L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(sizeOptionRepository.existsBySizeNameAndSizeCategoryId("L", 999L)).thenReturn(false);
         when(sizeCategoryRepository.getReferenceById(999L))
                 .thenThrow(new BadRequestException("Size Category not found"));

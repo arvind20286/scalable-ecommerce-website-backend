@@ -17,31 +17,31 @@ public class ShoppingController {
 
     @PostMapping
     public ResponseEntity<?> addToCart(@RequestBody AddToCartRequest request) {
-        Cart cart = shoppingService.addToCart(request.getIdUser(), request.getVariationId());
+        Cart cart = shoppingService.addToCart(request.getVariationId());
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity<?> syncCartItem(@RequestBody AddToCartRequest request) {
-        Cart cart = shoppingService.syncCartItem(request.getIdUser(), request.getVariationId(), request.getQuantity());
+        Cart cart = shoppingService.syncCartItem(request.getVariationId(), request.getQuantity());
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @DeleteMapping
     public ResponseEntity<?> removeFromCart(@RequestBody AddToCartRequest request) {
-        Cart cart = shoppingService.removeFromCart(request.getIdUser(), request.getVariationId());
+        Cart cart = shoppingService.removeFromCart(request.getVariationId());
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @GetMapping("/{idUser}")
     public ResponseEntity<?> getCart(@PathVariable Long idUser) {
-        Cart cart = shoppingService.getCart(idUser);
+        Cart cart = shoppingService.getCart();
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @DeleteMapping("/clear/{idUser}")
     public ResponseEntity<?> clearCart(@PathVariable Long idUser) {
-        Cart cart = shoppingService.clearCart(idUser);
+        Cart cart = shoppingService.clearCart();
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 }

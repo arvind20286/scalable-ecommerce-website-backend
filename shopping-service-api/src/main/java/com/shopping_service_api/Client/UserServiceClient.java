@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.shopping_service_api.DTO.UserDTO;
 
-@FeignClient(name = "user-service-api")
+@FeignClient(name = "users-service-api")
 public interface UserServiceClient {
 
     @GetMapping("/api/users/client/user/{id}")

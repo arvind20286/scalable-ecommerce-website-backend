@@ -11,4 +11,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
      boolean existsByCategory(String category);
 
      List<ProductCategory> findAllByParentCategoryIsNull();
+
+     List<ProductCategory> findAllByParentCategoryIsNotNull();
 }

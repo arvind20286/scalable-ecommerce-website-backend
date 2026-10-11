@@ -12,14 +12,20 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="product_category")
+@Table(name="product_category",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_parent_category",
+                        columnNames = {"parent_category_id", "category"}
+                )
+        })
 @Entity
 public class ProductCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String category;
 
     @ManyToOne

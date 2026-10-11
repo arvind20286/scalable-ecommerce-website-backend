@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.*;
 import com.product_service_api.Entity.AttributeOption;
 import com.product_service_api.Entity.AttributeType;
@@ -28,12 +28,12 @@ public class AttributeServiceImpl implements AttributeService {
     private final SizeOptionRepository sizeOptionRepository;
     private final AttributeTypeRepository attributeTypeRepository;
     private final AttributeOptionRepository attributeOptionRepository;
-    private final AuthServiceClient authServiceClient;
+    private final GatewayIdentity gatewayIdentity;
 
     @Override
     @CacheEvict(value = "colours", allEntries = true)
     public Colour addColour(ColourRequest colourRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
         if (colourRepository.existsByColourNameIgnoreCase(colourRequest.getColourName())) {
@@ -53,7 +53,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public SizeCategory addSizeCategory(SizeCategoryRequest sizeCategoryRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised");
         }
 
@@ -74,7 +74,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public SizeOption addSizeOption(SizeOptionRequest sizeOptionRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised");
         }
         if (sizeOptionRepository.existsBySizeNameAndSizeCategoryId(sizeOptionRequest.getSizeName(), sizeOptionRequest.getSizeCategoryId())) {
@@ -96,7 +96,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public AttributeType addAttributeType(AttributeTypeRequest attributeTypeRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
 
@@ -118,7 +118,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public AttributeOption addAttributeOption(AttributeOptionRequest attributeOptionRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
 

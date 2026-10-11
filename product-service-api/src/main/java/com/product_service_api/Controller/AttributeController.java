@@ -17,7 +17,7 @@ public class AttributeController {
 
     private final AttributeService attributeService;
 
-    @PostMapping("/colour")
+    @PostMapping("/colours")
     public ResponseEntity<?> addColour(@RequestBody ColourRequest colourRequest) {
         return new ResponseEntity<>(attributeService.addColour(colourRequest), HttpStatus.OK);
     }
@@ -47,7 +47,7 @@ public class AttributeController {
         return new ResponseEntity<>(attributeService.getAllSizeOptions(), HttpStatus.OK);
     }
 
-    @PostMapping("/attribute-type")
+    @PostMapping("/attribute-types")
     public ResponseEntity<?> addAttributeType(@RequestBody AttributeTypeRequest attributeTypeRequest) {
         return new ResponseEntity<>(attributeService.addAttributeType(attributeTypeRequest), HttpStatus.OK);
     }
@@ -57,7 +57,7 @@ public class AttributeController {
         return new ResponseEntity<>(attributeService.getAllAttributeTypes(), HttpStatus.OK);
     }
 
-    @PostMapping("/attribute-option")
+    @PostMapping("/attribute-options")
     public ResponseEntity<?> addAttributeOption(@RequestBody AttributeOptionRequest attributeOptionRequest) {
         return new ResponseEntity<>(attributeService.addAttributeOption(attributeOptionRequest), HttpStatus.OK);
     }

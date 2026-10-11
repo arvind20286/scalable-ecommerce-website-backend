@@ -1,7 +1,7 @@
 package com.product_service_api.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.*;
 import com.product_service_api.Entity.*;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -36,7 +37,7 @@ public class ProductServiceImpl implements ProductService {
     private final SizeOptionRepository sizeOptionRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final BrandRepository brandRepository;
-    private final AuthServiceClient authServiceClient;
+    private final GatewayIdentity gatewayIdentity;
     private final S3Client s3Client;
     private final ObjectMapper objectMapper;
 
@@ -75,9 +76,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product saveProduct(ProductRequest productRequest) {
-        if (!authServiceClient.isAdmin()) {
-            throw new ForbiddenException("User not authorised to perform the action");
+        if (!gatewayIdentity.isSeller()) {
+            throw new ForbiddenException("User is not a seller");
         }
+        Long sellerId = gatewayIdentity.getUserId();
+        if (sellerId == null) {
+            throw new ForbiddenException("User not authenticated");
+        }
+
         if (!brandRepository.existsById(productRequest.getBrandId()) || !productCategoryRepository.existsById(productRequest.getProductCategoryId())) {
             throw new BadRequestException("Either Brand or Product Category does not exist");
         }
@@ -86,6 +92,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(productRequest.getDescription());
         product.setBrand(brandRepository.getReferenceById(productRequest.getBrandId()));
         product.setProductCategory(productCategoryRepository.getReferenceById(productRequest.getProductCategoryId()));
+        product.setSellerId(sellerId);
 
         List<ProductItem> productItems = new ArrayList<>();
         for (ProductItemData itemData : productRequest.getProductItemList()) {
@@ -132,11 +139,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product saveProductWithImages(String productRequestString, Map<String, MultipartFile> imageFiles) throws IOException {
+        if (!gatewayIdentity.isSeller()) {
+            throw new ForbiddenException("User is not a seller");
+        }
+        Long sellerId = gatewayIdentity.getUserId();
+        if (sellerId == null) {
+            throw new ForbiddenException("User not authenticated");
+        }
+
         ProductRequest productRequest = objectMapper.readValue(productRequestString, ProductRequest.class);
 
-        if (!authServiceClient.isAdmin()) {
-            throw new ForbiddenException("User not authorised to perform the action");
-        }
         if (!brandRepository.existsById(productRequest.getBrandId()) || !productCategoryRepository.existsById(productRequest.getProductCategoryId())) {
             throw new BadRequestException("Either Brand or Product Category does not exist");
         }
@@ -145,6 +157,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(productRequest.getDescription());
         product.setBrand(brandRepository.findById(productRequest.getBrandId()).get());
         product.setProductCategory(productCategoryRepository.findById(productRequest.getProductCategoryId()).get());
+        product.setSellerId(sellerId);
 
         List<ProductItem> productItems = new ArrayList<>();
         for (ProductItemData itemData : productRequest.getProductItemList()) {
@@ -219,11 +232,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product updateProduct(Long productId, ProductRequest productRequest) {
-        if (!authServiceClient.isAdmin()) {
-            throw new ForbiddenException("User not authorised to perform the action");
-        }
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException("Product with id " + productId + " does not exist"));
+
+        Long currentUserId = gatewayIdentity.getUserId();
+        if (!gatewayIdentity.isAdmin() && !Objects.equals(existingProduct.getSellerId(), currentUserId)) {
+            throw new ForbiddenException("User not authorised to perform the action");
+        }
 
         if (!brandRepository.existsById(productRequest.getBrandId()) || !productCategoryRepository.existsById(productRequest.getProductCategoryId())) {
             throw new BadRequestException("Either Brand or Product Category does not exist");
@@ -290,11 +305,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void deleteProduct(Long productId) {
-        if (!authServiceClient.isAdmin()) {
-            throw new ForbiddenException("User not authorised to perform the action");
-        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException("Product with id " + productId + " does not exist"));
+
+        Long currentUserId = gatewayIdentity.getUserId();
+        if (!gatewayIdentity.isAdmin() && !Objects.equals(product.getSellerId(), currentUserId)) {
+            throw new ForbiddenException("User not authorised to perform the action");
+        }
+
         productRepository.delete(product);
     }
 
@@ -325,17 +343,6 @@ public class ProductServiceImpl implements ProductService {
 //        return images_entity;
 //    }
 
-    @Override
-    public Product updateStockProduct(Long idProduct, Integer sale) {
-        try {
-            Product product = productRepository.findById(idProduct).get();
-            // Integer stock = product.getStock();
-            // product.setStock(stock-sale);
-            return productRepository.save(product);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     @Override
     public List<ProductImages> getAllProductImages() {

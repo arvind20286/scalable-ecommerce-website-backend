@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ProductCategoryRequest;
 import com.product_service_api.Entity.ProductCategory;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -22,12 +22,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final ProductCategoryRepository productCategoryRepository;
     private final SizeCategoryRepository sizeCategoryRepository;
-    private final AuthServiceClient authServiceClient;
+    private final GatewayIdentity gatewayIdentity;
 
     @Override
     @Transactional
     public ProductCategory addProductCategory(ProductCategoryRequest productCategoryRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
 
@@ -71,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public ProductCategory updateProductCategory(Long categoryId, ProductCategoryRequest productCategoryRequest) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
 
@@ -111,7 +111,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @CacheEvict(value = "productCategories", allEntries = true)
     public boolean deleteProductCategory(Long categoryId) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised to perform the action");
         }
 
@@ -124,11 +124,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<ProductCategory> getParentProductCategories() {
-        try {
-            return productCategoryRepository.findAllByParentCategoryIsNull();
-        } catch (Exception e) {
-            return null;
-        }
+        List<ProductCategory> parentCategories = productCategoryRepository.findAllByParentCategoryIsNull();
+        parentCategories.forEach(category -> category.setSubCategories(null));
+        return parentCategories;
     }
 
 

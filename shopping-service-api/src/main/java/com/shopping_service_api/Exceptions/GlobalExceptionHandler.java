@@ -16,6 +16,13 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex, HttpServletRequest request) {
+        logger.warn("Forbidden request: {}", ex.getMessage());
+        ErrorResponse body = new ErrorResponse(ex.getMessage(), "Forbidden", LocalDateTime.now(), HttpStatusCode.valueOf(HttpStatus.FORBIDDEN.value()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         logger.warn("Bad request: {}", ex.getMessage());
@@ -38,4 +45,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }
-

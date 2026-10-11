@@ -7,4 +7,4 @@ COPY ./mvnw /root
 RUN ./mvnw dependency:go-offline
 COPY ./src /root/src
 RUN ./mvnw clean install -DskipTests
-ENTRYPOINT ["java","-jar","/root/target/user-service-api-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","/root/target/users-service-api-0.0.1-SNAPSHOT.jar"]

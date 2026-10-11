@@ -1,10 +1,9 @@
 package com.user_service_api.utils;
 
+import com.user_service_api.models.entities.Users;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import com.user_service_api.models.entities.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -28,13 +27,13 @@ public class JwtUtil {
     private Long JWT_EXPIRATION;
 
 
-    public String generateToken(User user) {
+    public String generateToken(Users users) {
  
         Date issuedAt = new Date(System.currentTimeMillis());
         Date expiration = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
 
 
-        Map<String, Object> claims = generateClaims(user);
+        Map<String, Object> claims = generateClaims(users);
 
 
         SecretKey key = getKey();
@@ -45,7 +44,7 @@ public class JwtUtil {
                 .header()
                 .type("JWT")
                 .and()
-                .subject(user.getEmail())
+                .subject(users.getEmail())
                 .claims(claims)
                 .issuedAt(issuedAt)
                 .expiration(expiration)
@@ -75,10 +74,10 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
     }
 
-    private Map<String, Object> generateClaims(User user) {
+    private Map<String, Object> generateClaims(Users users) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id", user.getId());
-        claims.put("role", user.getRole().name());
+        claims.put("user_id", users.getId());
+        claims.put("role", users.getRole().name());
 
         return claims;
     }

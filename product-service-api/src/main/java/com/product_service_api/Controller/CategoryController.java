@@ -26,6 +26,11 @@ public class CategoryController {
         return new ResponseEntity<>(categoryService.getAllProductCategories(), HttpStatus.OK);
     }
 
+    @GetMapping("/parents")
+    public ResponseEntity<?> getParentProductCategories() {
+        return new ResponseEntity<>(categoryService.getParentProductCategories(), HttpStatus.OK);
+    }
+
     @GetMapping("/{categoryId}")
     public ResponseEntity<?> getProductCategoryById(@PathVariable("categoryId") Long categoryId) {
         return new ResponseEntity<>(categoryService.getProductCategoryById(categoryId), HttpStatus.OK);

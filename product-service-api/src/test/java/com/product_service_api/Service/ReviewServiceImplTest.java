@@ -1,8 +1,7 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ReviewRequestDTO;
-import com.product_service_api.DTO.UserIdDTO;
 import com.product_service_api.Entity.Product;
 import com.product_service_api.Entity.Review;
 import com.product_service_api.Repository.ProductRepository;
@@ -30,7 +29,7 @@ class ReviewServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private AuthServiceClient authServiceClient;
+    private GatewayIdentity gatewayIdentity;
 
     @InjectMocks
     private ReviewServiceImpl reviewService;
@@ -52,10 +51,7 @@ class ReviewServiceImplTest {
         request.setRating(5);
         request.setComment("Great product!");
 
-        UserIdDTO userIdDTO = new UserIdDTO();
-        userIdDTO.setUserId(1L);
-
-        when(authServiceClient.getUserIdJWT()).thenReturn(userIdDTO);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
         when(productRepository.existsById(1L)).thenReturn(true);
         when(reviewRepository.existsByUserIdAndProductId(1L, 1L)).thenReturn(false);
         when(productRepository.getReferenceById(1L)).thenReturn(testProduct);

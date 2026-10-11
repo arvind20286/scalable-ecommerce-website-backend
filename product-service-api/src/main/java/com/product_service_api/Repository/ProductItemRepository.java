@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ProductItemRepository extends JpaRepository<ProductItem, Long> {
-    List<ProductItem> findAllByProductIdIn(List<Long> productIds, Pageable pageable);
+    List<ProductItem> findAllByProductIdIn(List<Long> list, Pageable pageable);
 }
 

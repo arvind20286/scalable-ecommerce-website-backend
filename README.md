@@ -9,7 +9,7 @@ A backend system built for a scalable ecommerce website, composed of microservic
 This project uses the following services (each in its own module):
 - `eureka-service-api` — service registry
 - `gateway-service-api` — API gateway / routing layer
-- `user-service-api` — handles user data, authentication
+- `users-service-api` — handles users data, authentication
 - `product-service-api` — handles products, catalog
 - `shopping-service-api` — handles shopping cart, wishlist
 - `order-service-api` — order processing
@@ -24,7 +24,7 @@ This project uses the following services (each in its own module):
 - Microservices architecture: each service handles a specific domain.
 - Scalability: services can be scaled independently.
 - Docker‑based deployment: easy to spin up all services locally or in a cloud.
-- Clean separation of concerns: user, product, order, payment, etc.
+- Clean separation of concerns: users, product, order, payment, etc.
 - Future‑ready: you can add new services (e.g., analytics, review service) easily.
 
 ---
@@ -48,7 +48,7 @@ This project uses the following services (each in its own module):
    ```  
 3. Access the services (for example):
     - Gateway at `http://localhost:<gateway-port>`
-    - User Service at `http://localhost:<user-service-port>/...`  
+    - User Service at `http://localhost:<users-service-port>/...`  
       Replace `<gateway-port>` etc. with the ports configured in each service.
 4. Test endpoints using Postman / CURL.
 
@@ -229,7 +229,7 @@ To deploy to production (example):
 1. Update environment‑specific configs (prod DB, prod service registry).
 2. Build Docker images for each service:
    ```bash  
-   docker build -t <repo>/user-service:latest ./user-service-api  
+   docker build -t <repo>/users-service:latest ./users-service-api  
    ```  
 3. Push Docker images to a registry (Docker Hub / AWS ECR / GCP Container Registry).
 4. Use `docker-compose.yml` or Kubernetes manifests for orchestration.

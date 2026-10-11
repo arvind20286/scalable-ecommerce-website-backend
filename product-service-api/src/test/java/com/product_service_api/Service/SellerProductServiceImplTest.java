@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.BrandRequestDTO;
 import com.product_service_api.Entity.Brand;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -30,7 +30,7 @@ class SellerProductServiceImplTest {
     private BrandRepository brandRepository;
 
     @Mock
-    private AuthServiceClient authServiceClient;
+    private GatewayIdentity gatewayIdentity;
 
     @InjectMocks
     private SellerProductServiceImpl sellerProductService;
@@ -65,7 +65,7 @@ class SellerProductServiceImplTest {
         request.setBrandName("NewBrand");
         request.setBrandDescription("Brand Description");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(brandRepository.existsByBrandName("NewBrand")).thenReturn(false);
         when(brandRepository.save(any(Brand.class))).thenReturn(testBrand);
 
@@ -81,7 +81,7 @@ class SellerProductServiceImplTest {
         BrandRequestDTO request = new BrandRequestDTO();
         request.setBrandName("ExistingBrand");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(brandRepository.existsByBrandName("ExistingBrand")).thenReturn(true);
 
         assertThatThrownBy(() -> sellerProductService.registerBrand(request))
@@ -94,7 +94,7 @@ class SellerProductServiceImplTest {
     void testRegisterBrand_NotAdmin() {
         BrandRequestDTO request = new BrandRequestDTO();
 
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
 
         assertThatThrownBy(() -> sellerProductService.registerBrand(request))
                 .isInstanceOf(ForbiddenException.class);

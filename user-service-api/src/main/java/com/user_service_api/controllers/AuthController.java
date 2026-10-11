@@ -12,7 +12,6 @@ import com.user_service_api.models.dtos.RegisterDTO;
 import com.user_service_api.services.AuthService;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {

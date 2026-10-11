@@ -21,7 +21,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+public class Users implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

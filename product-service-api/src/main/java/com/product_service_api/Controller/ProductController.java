@@ -37,7 +37,7 @@ public class ProductController {
     @GetMapping("/paginated")
     public ResponseEntity<?> getProductsPaginatedAndSortByPrice(@RequestParam int page,
                                                                 @RequestParam int size,
-                                                                @RequestParam Long category,
+                                                                @RequestParam(required = false) Long category,
                                                                 @RequestParam(required = false) String sort) {
         return new ResponseEntity<>(itemService.getProductsPaginatedAndSortByPrice(page, size, category, sort), HttpStatus.OK);
 

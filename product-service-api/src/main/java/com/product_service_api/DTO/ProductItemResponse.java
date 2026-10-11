@@ -19,5 +19,6 @@ public class ProductItemResponse {
     private Double salePrice;
     private Double originalPrice;
     private Long colourId;
+    private List<ProductImageResponse> productImageResponseList;
     private List<VariationData> variationDataList;
 }

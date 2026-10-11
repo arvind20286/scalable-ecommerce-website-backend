@@ -3,13 +3,13 @@ package com.shopping_service_api.Service;
 import com.shopping_service_api.entity.Cart;
 
 public interface ShoppingService {
-    Cart addToCart(Long idUser, Long idProduct);
+    Cart addToCart(Long variationId);
 
-    Cart syncCartItem(Long idUser, Long variationId, Integer quantity);
+    Cart syncCartItem(Long variationId, Integer quantity);
 
-    Cart removeFromCart(Long idUser, Long idProduct);
+    Cart removeFromCart(Long variationId);
 
-    Cart clearCart(Long idUser);
+    Cart clearCart();
 
-    Cart getCart(Long idUser);
+    Cart getCart();
 }

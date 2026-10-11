@@ -20,7 +20,6 @@ public interface ProductService {
     void deleteProduct(Long productId);
     List<Product> saveListProducts(List<Product> products);
 //    List<ProductImages> saveWithImage(Long productId, List<MultipartFile> images) throws IOException;
-    Product updateStockProduct(Long idProduct, Integer sale);
     List<ProductImages> getAllProductImages();
     List<ProductVariation> getAllProductVariations();
 

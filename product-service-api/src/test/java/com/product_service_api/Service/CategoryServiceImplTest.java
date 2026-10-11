@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ProductCategoryRequest;
 import com.product_service_api.Entity.ProductCategory;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -32,7 +32,7 @@ class CategoryServiceImplTest {
     private ProductCategoryRepository productCategoryRepository;
 
     @Mock
-    private AuthServiceClient authServiceClient;
+    private GatewayIdentity gatewayIdentity;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
@@ -68,7 +68,7 @@ class CategoryServiceImplTest {
         request.setSizeCategoryId(0L);
         request.setParentCategoryId(0L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(productCategoryRepository.existsByCategory("NewCategory")).thenReturn(false);
         when(productCategoryRepository.save(any(ProductCategory.class))).thenReturn(testCategory);
 
@@ -84,7 +84,7 @@ class CategoryServiceImplTest {
         ProductCategoryRequest request = new ProductCategoryRequest();
         request.setCategory("Electronics");
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(productCategoryRepository.existsByCategory("Electronics")).thenReturn(true);
 
         assertThatThrownBy(() -> categoryService.addProductCategory(request))
@@ -101,7 +101,7 @@ class CategoryServiceImplTest {
         request.setSizeCategoryId(0L);
         request.setParentCategoryId(0L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(productCategoryRepository.findById(1L)).thenReturn(Optional.of(testCategory));
         when(productCategoryRepository.save(any(ProductCategory.class))).thenReturn(testCategory);
 
@@ -114,7 +114,7 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("Should delete product category successfully")
     void testDeleteProductCategory_Success() {
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(productCategoryRepository.findById(1L)).thenReturn(Optional.of(testCategory));
 
         categoryService.deleteProductCategory(1L);
@@ -127,7 +127,7 @@ class CategoryServiceImplTest {
     void testUpdateProductCategory_NotAdmin() {
         ProductCategoryRequest request = new ProductCategoryRequest();
 
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
 
         assertThatThrownBy(() -> categoryService.updateProductCategory(1L, request))
                 .isInstanceOf(ForbiddenException.class);
@@ -136,7 +136,7 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("Should throw ForbiddenException when non-admin tries to delete product category")
     void testDeleteProductCategory_NotAdmin() {
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
 
         assertThatThrownBy(() -> categoryService.deleteProductCategory(1L))
                 .isInstanceOf(ForbiddenException.class);
@@ -149,7 +149,7 @@ class CategoryServiceImplTest {
         request.setCategory("UpdatedCategory");
         request.setParentCategoryId(999L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
         when(productCategoryRepository.findById(1L)).thenReturn(Optional.of(testCategory));
         when(productCategoryRepository.existsById(999L)).thenReturn(false);
 

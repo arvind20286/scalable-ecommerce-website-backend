@@ -1,5 +1,6 @@
 package com.user_service_api.services.impl;
 
+import com.user_service_api.models.entities.Users;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.user_service_api.models.dtos.AuthDTO;
 import com.user_service_api.models.dtos.LoginDTO;
 import com.user_service_api.models.dtos.RegisterDTO;
-import com.user_service_api.models.entities.User;
 import com.user_service_api.repositories.UserRepository;
 import com.user_service_api.services.AuthService;
 import com.user_service_api.utils.JwtUtil;
@@ -37,8 +37,8 @@ public class AuthServiceImpl implements AuthService {
         try {
             authenticate(login.getEmail(), login.getPassword());
 
-            User user = userService.getUserByEmail(login.getEmail());
-            String token = jwtUtil.generateToken(user);
+            Users users = userService.getUserByEmail(login.getEmail());
+            String token = jwtUtil.generateToken(users);
             return new AuthDTO(token);
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             System.out.println(e.getMessage());
@@ -53,10 +53,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthDTO register(RegisterDTO register) throws Exception {
         try {
-            User user = createUserFromRegistration(register);
-            user = userRepository.save(user);
+            Users users = createUserFromRegistration(register);
+            users = userRepository.save(users);
 
-            String token = jwtUtil.generateToken(user);
+            String token = jwtUtil.generateToken(users);
             return new AuthDTO(token);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -68,16 +68,16 @@ public class AuthServiceImpl implements AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
-    private User createUserFromRegistration(RegisterDTO register) {
-        User user = new User();
-        user.setName(register.getName());
-        user.setLastName(register.getLastName());
-        user.setEmail(register.getEmail());
-        user.setPassword(passwordEncoder.encode(register.getPassword()));
-        user.setRole(register.getRole());
-        user.setAddress(register.getAddress());
-        user.setPhone(register.getPhone());
+    private Users createUserFromRegistration(RegisterDTO register) {
+        Users users = new Users();
+        users.setName(register.getName());
+        users.setLastName(register.getLastName());
+        users.setEmail(register.getEmail());
+        users.setPassword(passwordEncoder.encode(register.getPassword()));
+        users.setRole(register.getRole());
+        users.setAddress(register.getAddress());
+        users.setPhone(register.getPhone());
 
-        return user;
+        return users;
     }
 }

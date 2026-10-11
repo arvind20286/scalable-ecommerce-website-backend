@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ReviewRequestDTO;
 import com.product_service_api.Entity.Product;
 import com.product_service_api.Entity.Review;
@@ -17,11 +17,11 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
-    private final AuthServiceClient authServiceClient;
+    private final GatewayIdentity gatewayIdentity;
 
     @Override
     public Review addProductReview(ReviewRequestDTO reviewRequestDTO) {
-        Long userId = authServiceClient.getUserIdJWT().getUserId();
+        Long userId = gatewayIdentity.getUserId();
         if (!productRepository.existsById(reviewRequestDTO.getProductId()) || reviewRepository.existsByUserIdAndProductId(userId, reviewRequestDTO.getProductId())) {
             throw new RuntimeException("Either product does not exist or review already exists");
         }

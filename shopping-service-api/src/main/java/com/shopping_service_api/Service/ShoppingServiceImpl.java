@@ -2,6 +2,7 @@ package com.shopping_service_api.Service;
 
 import java.util.ArrayList;
 
+import com.shopping_service_api.Authorization.GatewayIdentity;
 import com.shopping_service_api.DTO.ProductVariationDTO;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import com.shopping_service_api.Repository.CartRepository;
 @RequiredArgsConstructor
 public class ShoppingServiceImpl implements ShoppingService {
 
+    private final GatewayIdentity gatewayIdentity;
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
     private final CartRepository cartRepository;
@@ -25,12 +27,13 @@ public class ShoppingServiceImpl implements ShoppingService {
     private static final Logger logger = LoggerFactory.getLogger(ShoppingServiceImpl.class);
 
     @Override
-    public Cart addToCart(Long idUser, Long variationId) {
+    public Cart addToCart(Long variationId) {
+        Long idUser = gatewayIdentity.getUserId();
         logger.debug("AddToCart called: userId={}, variationId={}", idUser, variationId);
         Integer quantity = 1;
-        if (idUser == null || variationId == null || quantity == null || quantity <= 0) {
+        if (variationId == null || quantity <= 0) {
             logger.error("Invalid input to AddToCart: userId={}, productId={}, quantity={}", idUser, variationId, quantity);
-            throw new IllegalArgumentException("Invalid input: userId, productId and quantity must be provided and quantity must be > 0");
+            throw new IllegalArgumentException("Invalid input: variationId must be provided and quantity must be > 0");
         }
 
         UserDTO user = userServiceClient.getUserById(idUser);
@@ -94,7 +97,8 @@ public class ShoppingServiceImpl implements ShoppingService {
     }
 
     @Override
-    public Cart syncCartItem(Long idUser, Long variationId, Integer quantity) {
+    public Cart syncCartItem(Long variationId, Integer quantity) {
+        Long idUser = gatewayIdentity.getUserId();
         Cart cart = cartRepository.findByIdUser(idUser);
         if (cart == null) {
             throw new IllegalArgumentException("Error no Product added to cart");
@@ -117,7 +121,8 @@ public class ShoppingServiceImpl implements ShoppingService {
     }
 
     @Override
-    public Cart removeFromCart(Long idUser, Long variationId) {
+    public Cart removeFromCart(Long variationId) {
+        Long idUser = gatewayIdentity.getUserId();
         Cart cart = cartRepository.findByIdUser(idUser);
         if (cart == null) {
             throw new IllegalArgumentException("Error no Product added to cart");
@@ -135,7 +140,8 @@ public class ShoppingServiceImpl implements ShoppingService {
     }
 
     @Override
-    public Cart clearCart(Long idUser) {
+    public Cart clearCart() {
+        Long idUser = gatewayIdentity.getUserId();
         Cart cart = cartRepository.findByIdUser(idUser);
         if (cart == null) {
             throw new IllegalArgumentException("Error no Product added to cart");
@@ -146,7 +152,8 @@ public class ShoppingServiceImpl implements ShoppingService {
     }
 
     @Override
-    public Cart getCart(Long idUser) {
+    public Cart getCart() {
+        Long idUser = gatewayIdentity.getUserId();
         Cart cartToSend = cartRepository.findByIdUser(idUser);
         if (cartToSend == null) {
             throw new IllegalArgumentException("El carrito del usuario no existe.");
@@ -155,4 +162,3 @@ public class ShoppingServiceImpl implements ShoppingService {
     }
 
 }
-

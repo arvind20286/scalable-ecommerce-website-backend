@@ -27,6 +27,9 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
+    private Long sellerId;
+
     @ManyToOne
     @JsonBackReference
     private Brand brand;
@@ -48,5 +51,3 @@ public class Product {
     private List<Review> reviews;
 
 }
-
-

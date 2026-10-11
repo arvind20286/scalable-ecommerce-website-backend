@@ -2,7 +2,7 @@ package com.shopping_service_api.Authorization.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.shopping_service_api.Authorization.Interceptor.BearerTokenRequestInterceptor;
+import com.shopping_service_api.Authorization.Interceptor.GatewayHeadersRequestInterceptor;
 
 import feign.RequestInterceptor;
 
@@ -10,7 +10,7 @@ import feign.RequestInterceptor;
 public class FeignConfig {
 
     @Bean
-    public RequestInterceptor bearerTokenRequestInterceptor() {
-        return new BearerTokenRequestInterceptor();
+    public RequestInterceptor gatewayHeadersRequestInterceptor() {
+        return new GatewayHeadersRequestInterceptor();
     }
 }

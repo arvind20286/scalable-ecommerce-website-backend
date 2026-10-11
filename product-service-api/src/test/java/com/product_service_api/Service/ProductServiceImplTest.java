@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ProductRequest;
 import com.product_service_api.Entity.Brand;
 import com.product_service_api.Entity.Product;
@@ -39,7 +39,7 @@ class ProductServiceImplTest {
     private BrandRepository brandRepository;
 
     @Mock
-    private AuthServiceClient authServiceClient;
+    private GatewayIdentity gatewayIdentity;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -122,12 +122,14 @@ class ProductServiceImplTest {
         request.setProductItemList(new ArrayList<>());
         request.setProductAttributeDataList(new ArrayList<>());
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isSeller()).thenReturn(true);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
         when(brandRepository.existsById(1L)).thenReturn(true);
         when(productCategoryRepository.existsById(1L)).thenReturn(true);
         when(productRepository.save(any(Product.class))).thenReturn(testProduct);
         when(brandRepository.getReferenceById(1L)).thenReturn(testBrand);
         when(productCategoryRepository.getReferenceById(1L)).thenReturn(testCategory);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
 
         Product result = productService.saveProduct(request);
 
@@ -140,11 +142,11 @@ class ProductServiceImplTest {
     void testSaveProduct_NotAdmin() {
         ProductRequest request = new ProductRequest();
 
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isSeller()).thenReturn(false);
 
         assertThatThrownBy(() -> productService.saveProduct(request))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("User not authorised to perform the action");
+                .hasMessage("User is not a seller");
     }
 
     @Test
@@ -154,7 +156,8 @@ class ProductServiceImplTest {
         request.setBrandId(999L);
         request.setProductCategoryId(1L);
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isSeller()).thenReturn(true);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
         when(brandRepository.existsById(999L)).thenReturn(false);
 
         assertThatThrownBy(() -> productService.saveProduct(request))
@@ -173,7 +176,8 @@ class ProductServiceImplTest {
         request.setProductItemList(new ArrayList<>());
         request.setProductAttributeDataList(new ArrayList<>());
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
         when(brandRepository.existsById(1L)).thenReturn(true);
         when(productCategoryRepository.existsById(1L)).thenReturn(true);
@@ -193,7 +197,6 @@ class ProductServiceImplTest {
     void testUpdateProduct_NotFound() {
         ProductRequest request = new ProductRequest();
 
-        when(authServiceClient.isAdmin()).thenReturn(true);
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.updateProduct(999L, request))
@@ -204,7 +207,8 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("Should delete product successfully")
     void testDeleteProduct_Success() {
-        when(authServiceClient.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.isAdmin()).thenReturn(true);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
 
         productService.deleteProduct(1L);
@@ -215,7 +219,6 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("Should throw BadRequestException when deleting non-existent product")
     void testDeleteProduct_NotFound() {
-        when(authServiceClient.isAdmin()).thenReturn(true);
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.deleteProduct(999L))
@@ -226,8 +229,11 @@ class ProductServiceImplTest {
     @DisplayName("Should throw ForbiddenException when non-admin tries to update product")
     void testUpdateProduct_NotAdmin() {
         ProductRequest request = new ProductRequest();
+        testProduct.setSellerId(2L);
 
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
 
         assertThatThrownBy(() -> productService.updateProduct(1L, request))
                 .isInstanceOf(ForbiddenException.class);
@@ -236,7 +242,11 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("Should throw ForbiddenException when non-admin tries to delete product")
     void testDeleteProduct_NotAdmin() {
-        when(authServiceClient.isAdmin()).thenReturn(false);
+        testProduct.setSellerId(2L);
+
+        when(gatewayIdentity.isAdmin()).thenReturn(false);
+        when(gatewayIdentity.getUserId()).thenReturn(1L);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
 
         assertThatThrownBy(() -> productService.deleteProduct(1L))
                 .isInstanceOf(ForbiddenException.class);

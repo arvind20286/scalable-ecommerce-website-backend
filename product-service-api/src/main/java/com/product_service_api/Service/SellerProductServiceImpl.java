@@ -1,6 +1,6 @@
 package com.product_service_api.Service;
 
-import com.product_service_api.Authorization.Client.AuthServiceClient;
+import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.BrandRequestDTO;
 import com.product_service_api.Entity.Brand;
 import com.product_service_api.Exceptions.BadRequestException;
@@ -17,11 +17,11 @@ import java.util.List;
 public class SellerProductServiceImpl implements SellerProductService {
 
     private final BrandRepository brandRepository;
-    private final AuthServiceClient authServiceClient;
+    private final GatewayIdentity gatewayIdentity;
 
     @Override
     public Brand registerBrand(BrandRequestDTO brandRequestDTO) {
-        if (!authServiceClient.isAdmin()) {
+        if (!gatewayIdentity.isAdmin()) {
             throw new ForbiddenException("User not authorised");
         }
 
