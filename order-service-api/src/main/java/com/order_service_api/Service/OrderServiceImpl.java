@@ -16,6 +16,8 @@ import com.order_service_api.Model.dto.CartDTO;
 import com.order_service_api.Model.dto.ResponseOrder;
 import com.order_service_api.Model.dto.UserDTO;
 import com.order_service_api.Repository.OrderRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +42,11 @@ public class OrderServiceImpl implements OrderService {
                         .totalPrice(Math.round((cartItem.getPrice() * cartItem.getQuantity()) * 100.0) / 100.0)
                         .build())
                 .collect(Collectors.toList());
+        double subtotal = cart.getTotal();
+        double shippingFee = subtotal > 0 && subtotal <= 1000 ? 99 : 0;
+        double totalAmount = BigDecimal.valueOf(subtotal * 1.08 + shippingFee)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
         Order order = Order.builder()
                 .name(user.getName())
                 .lastName(user.getLastName())
@@ -48,22 +55,18 @@ public class OrderServiceImpl implements OrderService {
                 .address(user.getAddress())
                 .phone(user.getPhone())
                 .items(OrderItems)
-                .totalAmount(Math.round(cart.getTotal() * 100.0) / 100.0)
+                .totalAmount(totalAmount)
                 .orderStatus(StatusOrder.PENDING)
                 .build();
-            shopServiceClient.cleanCart(idUser);
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        shopServiceClient.cleanCart(idUser);
+        return savedOrder;
     }
 
     @Override
     public Order bringOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).get();
-        if (order != null) {
-            order.setOrderStatus(StatusOrder.PROCESSING);
-            return orderRepository.save(order);
-        } else {
-            throw new RuntimeException("Order not found with given order id: " + orderId);
-        }
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with given order id: " + orderId));
     }
 
     @Override

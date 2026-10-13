@@ -17,7 +17,7 @@ public class ProductResponse {
     private String name;
     private String description;
     private String brandName;
-    private String categoryName;
+    private CategoryDTO category;
     private List<ProductItemResponse> productItems;
     private List<ProductAttributeResponse> attributes;
     private List<ReviewResponse> reviews;

@@ -153,7 +153,8 @@ class ItemServiceImplTest {
         assertThat(result.get(0).getId()).isEqualTo(1L);
         assertThat(result.get(0).getName()).isEqualTo("Laptop");
         assertThat(result.get(0).getBrandName()).isEqualTo("Brand");
-        assertThat(result.get(0).getCategoryName()).isEqualTo("Electronics");
+        assertThat(result.get(0).getCategory().getId()).isEqualTo(3L);
+        assertThat(result.get(0).getCategory().getName()).isEqualTo("Electronics");
         assertThat(result.get(0).getProductItems()).isEmpty();
         verify(productRepository).findPageByCategoryIdsSortedByLowestSalePriceAsc(List.of(3L), pageable);
         verify(productItemRepository, never()).findAllByProductIdIn(anyList(), any());

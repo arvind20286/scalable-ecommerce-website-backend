@@ -2,6 +2,7 @@ package com.product_service_api.Service;
 
 import com.product_service_api.Authorization.GatewayIdentity;
 import com.product_service_api.DTO.ProductAttributeResponse;
+import com.product_service_api.DTO.CategoryDTO;
 import com.product_service_api.DTO.ProductImageResponse;
 import com.product_service_api.DTO.ProductItemResponse;
 import com.product_service_api.DTO.ProductResponse;
@@ -161,7 +162,10 @@ public class ItemServiceImpl implements ItemService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .brandName(product.getBrand() == null ? null : product.getBrand().getBrandName())
-                .categoryName(product.getProductCategory() == null ? null : product.getProductCategory().getCategory())
+                .category(product.getProductCategory() == null ? null : CategoryDTO.builder()
+                        .id(product.getProductCategory().getId())
+                        .name(product.getProductCategory().getCategory())
+                        .build())
                 .productItems(items)
                 .attributes(attributes)
                 .reviews(reviews)

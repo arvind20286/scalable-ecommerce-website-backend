@@ -25,9 +25,12 @@ resilience4j.circuitbreaker:
       eventConsumerBufferSize: 10
 
 paypal:
-  client-id: AUv8rrc_P-EbP2E0mpb49BV7rFt3Usr-vdUZO8VGOnjRehGHBXkSzchr37SYF2GNdQFYSp72jh5QUhzG
-  client-secret: EMnAWe06ioGtouJs7gLYT9chK9-2jJ--7MKRXpI8FesmY_2Kp-d_7aCqff7M9moEJBvuXoBO4clKtY0v
-  mode: sandbox    
+  client-id: ${PAYPAL_CLIENT_ID}
+  client-secret: ${PAYPAL_CLIENT_SECRET}
+  mode: ${PAYPAL_MODE}
+
+payment:
+  public-base-url: ${PAYMENT_PUBLIC_BASE_URL:http://localhost:8084}
 
 eureka:
   client:

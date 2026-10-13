@@ -72,7 +72,7 @@
         <div class="order-summary">
             <h2>Order Summary</h2>
             <p><strong>Order ID:</strong> <span th:text="${order.orderId}"></span></p>
-            <p><strong>Total Amount:</strong> $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span></p>
+            <p><strong>Total Amount:</strong> ₹<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span></p>
             <p><strong>Order Date:</strong> <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span></p>
         </div>
         <a href="/" class="button">Return to Home</a>

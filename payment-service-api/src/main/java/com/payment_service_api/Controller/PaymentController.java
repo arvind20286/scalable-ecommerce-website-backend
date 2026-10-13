@@ -1,21 +1,22 @@
 package com.payment_service_api.Controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.view.RedirectView;
-
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 import com.payment_service_api.Feign.Client.NotificationClient;
 import com.payment_service_api.dto.OrderDTO;
+import com.payment_service_api.dto.CheckoutRequest;
+import com.payment_service_api.dto.CheckoutResponse;
 import com.payment_service_api.dto.PayDTO;
 import com.payment_service_api.Service.PaymentService;
-import com.paypal.api.payments.Links;
-import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 
 import lombok.RequiredArgsConstructor;
@@ -30,78 +31,59 @@ public class PaymentController {
 
     private final NotificationClient notificationClient;
 
-    @GetMapping("/{orderId}")
-    private String ViewPayment(@PathVariable Long orderId, Model model) {
-        OrderDTO orderDTO = paymentService.ViewOrderDetails(orderId);
-        model.addAttribute("order", orderDTO);
-        return "index";
+    @Value("${payment.public-base-url}")
+    private String paymentPublicBaseUrl;
+
+    @PostMapping("/api/payment/checkout")
+    @ResponseBody
+    public CheckoutResponse startCheckout(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestBody(required = false) CheckoutRequest request) throws PayPalRESTException {
+        String currency = request == null || request.getCurrency() == null || request.getCurrency().isBlank()
+                ? "INR"
+                : request.getCurrency().toUpperCase();
+        if (!java.util.List.of("INR").contains(currency)) {
+            throw new IllegalArgumentException("Unsupported currency: " + currency);
+        }
+        String successUrl = paymentPublicBaseUrl + "/payment/success/{orderId}";
+        String cancelUrl = paymentPublicBaseUrl + "/payment/cancel";
+        CheckoutResponse response = paymentService.startCheckout(userId, currency, successUrl, cancelUrl);
+        return response;
     }
 
-    @PostMapping("/payment/create")
-    @CircuitBreaker(name = "paypalError", fallbackMethod = "paypalError")
-    public RedirectView createPayment(
-            @RequestParam("orderid") Long orderId,
-            @RequestParam("method") String method,
-            @RequestParam("amount") String amount,
-            @RequestParam("currency") String currency,
-            @RequestParam("description") String description) {
-        String amounts = amount.replace(',', '.');
-        String cancelUrl = "http://localhost:8084/payment/cancel";
-        String successUrl = String.format("http://localhost:8084/payment/success/%d", orderId);
-        Payment payment = null;
-        try {
-            payment = paymentService.createPayment(
-                    orderId,
-                    Double.valueOf(amounts),
-                    currency,
-                    method,
-                    "sale",
-                    description,
-                    cancelUrl,
-                    successUrl);
-        } catch (PayPalRESTException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Links links : payment.getLinks()) {
-            if (links.getRel().equals("approval_url")) {
-                return new RedirectView(links.getHref());
-            }
-        }
-        return new RedirectView("/payment/error");
-    }
-
-    public String paypalError(Throwable throwable) {
-        return "Could not connect with paypal";
+    @GetMapping("/payment/cancel")
+    private String paymentCancelled() {
+        return "paymentFailed";
     }
 
     @GetMapping("/payment/success/{orderId}")
     private String ViewSuccess(@PathVariable Long orderId, Model model,
             @RequestParam("paymentId") String paymentId,
             @RequestParam("PayerID") String payerId) {
-        OrderDTO orderDTO = paymentService.ViewPaymentSuccess(orderId);
-        model.addAttribute("order", orderDTO);
-        PayDTO informationToPay = PayDTO.builder().orderId(orderId)
-                .userName(orderDTO.getName())
-                .userEmail(orderDTO.getEmail())
-                .userAddress(orderDTO.getAddress())
-                .userPhone(orderDTO.getPhone())
-                .orderStatus(orderDTO.getOrderStatus())
-                .orderDate(orderDTO.getOrderDate())
-                .totalAmount(orderDTO.getTotalAmount())
-                .build();
-        notificationClient.sendEmail(informationToPay);
         try {
-            Payment payment = paymentService.executePayment(paymentId, payerId);
-            if (payment.getState().equals("approved")) {
-                //notificationClient.sendSms(orderDTO.getPhone(), "Payment Success");
-                return "paymentSuccess";
+            OrderDTO orderDTO = paymentService.completeOrderAfterApprovedPayment(orderId, paymentId, payerId);
+            model.addAttribute("order", orderDTO);
+            PayDTO informationToPay = PayDTO.builder().orderId(orderId)
+                    .userName(orderDTO.getName())
+                    .userEmail(orderDTO.getEmail())
+                    .userAddress(orderDTO.getAddress())
+                    .userPhone(orderDTO.getPhone())
+                    .orderStatus(orderDTO.getOrderStatus())
+                    .orderDate(orderDTO.getOrderDate())
+                    .totalAmount(orderDTO.getTotalAmount())
+                    .build();
+            try {
+                notificationClient.sendEmail(informationToPay);
+            } catch (RuntimeException notificationError) {
+                log.error("Could not send payment confirmation notification for order {}", orderId, notificationError);
             }
+            return "paymentSuccess";
         } catch (PayPalRESTException e) {
             log.error("Error occurred:: ", e);
+        } catch (RuntimeException e) {
+            log.error("Payment was not confirmed for order {}", orderId, e);
         }
-        return "paymentSuccess";
-
+        return "paymentFailed";
     }
 
 }
