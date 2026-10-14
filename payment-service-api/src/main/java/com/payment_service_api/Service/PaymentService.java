@@ -1,135 +1,160 @@
 package com.payment_service_api.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import org.springframework.stereotype.Service;
-import com.paypal.api.payments.Amount;
-import com.paypal.api.payments.Payer;
-import com.paypal.api.payments.Payment;
-import com.paypal.api.payments.PaymentExecution;
-import com.paypal.api.payments.RedirectUrls;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.payment_service_api.Feign.Client.OrderServiceClient;
 import com.payment_service_api.dto.CheckoutResponse;
 import com.payment_service_api.dto.OrderDTO;
-import com.paypal.api.payments.*;
-import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.PayPalRESTException;
+import com.payment_service_api.dto.PaymentVerificationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
-    private final APIContext apiContext;
+
+    private static final String CURRENCY = "INR";
+    private final RestClient razorpayRestClient;
     private final OrderServiceClient orderServiceClient;
 
-    public OrderDTO viewOrderDetails(Long idOrder) {
-        return orderServiceClient.bringOrder(idOrder);
-    }
+    @Value("${razorpay.key-id}")
+    private String razorpayKeyId;
 
-    public CheckoutResponse startCheckout(Long userId, String currency, String successUrl, String cancelUrl)
-            throws PayPalRESTException {
+    @Value("${razorpay.key-secret}")
+    private String razorpayKeySecret;
+
+    public CheckoutResponse startCheckout(Long userId) {
         OrderDTO order = orderServiceClient.createOrder(userId);
         if (order.getOrderId() == null || order.getTotalAmount() == null || order.getTotalAmount() <= 0) {
             throw new IllegalStateException("Order service returned an invalid order for payment");
         }
 
-        Payment payment = createPayment(
+        long amountInPaise = BigDecimal.valueOf(order.getTotalAmount())
+                .setScale(2, RoundingMode.HALF_UP)
+                .movePointRight(2)
+                .longValueExact();
+        String receipt = "order-" + order.getOrderId();
+        JsonNode razorpayOrder = razorpayRestClient.post()
+                .uri("/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "amount", amountInPaise,
+                        "currency", CURRENCY,
+                        "receipt", receipt,
+                        "notes", Map.of("internalOrderId", order.getOrderId().toString())
+                ))
+                .retrieve()
+                .body(JsonNode.class);
+
+        if (razorpayOrder == null || !razorpayOrder.hasNonNull("id")) {
+            throw new IllegalStateException("Razorpay did not return a payment order ID");
+        }
+        return new CheckoutResponse(
                 order.getOrderId(),
-                order.getTotalAmount(),
-                currency,
-                "paypal",
-                "sale",
-                "Order " + order.getOrderId(),
-                cancelUrl,
-                successUrl.replace("{orderId}", order.getOrderId().toString())
+                razorpayOrder.get("id").asText(),
+                razorpayKeyId,
+                amountInPaise,
+                CURRENCY
         );
-        String approvalUrl = payment.getLinks().stream()
-                .filter(link -> "approval_url".equals(link.getRel()))
-                .map(Links::getHref)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Payment provider did not return an approval URL"));
-        return new CheckoutResponse(order.getOrderId(), approvalUrl);
     }
 
-    public Payment createPayment(
-            Long orderId,
-            Double total,
-            String currency,
-            String method,
-            String intent,
-            String description,
-            String cancelUrl,
-            String successUrl
-    ) throws PayPalRESTException {
-        Amount amount = new Amount();
-        amount.setCurrency(currency);
-        amount.setTotal(String.format(Locale.US, "%.2f", total));
+    public OrderDTO verifyPayment(Long userId, PaymentVerificationRequest request) {
+        verifySignature(request);
 
-        Transaction transaction = new Transaction();
-        transaction.setDescription(description);
-        transaction.setAmount(amount);
-        transaction.setCustom(String.valueOf(orderId));
-
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(transaction);
-
-        Payer payer = new Payer();
-        payer.setPaymentMethod(method);
-
-        Payment payment = new Payment();
-        payment.setIntent(intent);
-        payment.setPayer(payer);
-        payment.setTransactions(transactions);
-
-        RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(cancelUrl);
-        redirectUrls.setReturnUrl(successUrl);
-
-        payment.setRedirectUrls(redirectUrls);
-
-        return payment.create(apiContext);
-    }
-
-    public Payment executePayment(
-            String paymentId,
-            String payerId
-    ) throws PayPalRESTException {
-        Payment payment = new Payment();
-        payment.setId(paymentId);
-
-        PaymentExecution paymentExecution = new PaymentExecution();
-        paymentExecution.setPayerId(payerId);
-
-        return payment.execute(apiContext, paymentExecution);
-    }
-
-    public OrderDTO completeOrderAfterApprovedPayment(Long orderId, String paymentId, String payerId)
-            throws PayPalRESTException {
-        OrderDTO order = orderServiceClient.bringOrder(orderId);
-        Payment executedPayment = executePayment(paymentId, payerId);
-        if (!"approved".equalsIgnoreCase(executedPayment.getState())
-                || executedPayment.getTransactions() == null
-                || executedPayment.getTransactions().isEmpty()) {
-            throw new IllegalStateException("Payment was not approved");
+        JsonNode razorpayOrder = razorpayRestClient.get()
+                .uri("/orders/{orderId}", request.getRazorpayOrderId())
+                .retrieve()
+                .body(JsonNode.class);
+        if (razorpayOrder == null
+                || !("order-" + request.getOrderId()).equals(textValue(razorpayOrder, "receipt"))
+                || !request.getOrderId().toString().equals(
+                        textValue(razorpayOrder.path("notes"), "internalOrderId"))) {
+            throw new IllegalArgumentException("Razorpay order does not match the requested order");
         }
 
-        Transaction transaction = executedPayment.getTransactions().get(0);
-        Amount amount = transaction.getAmount();
-        if (amount == null || !"INR".equalsIgnoreCase(amount.getCurrency())) {
-            throw new IllegalStateException("Approved payment currency does not match the order currency");
+        OrderDTO order = orderServiceClient.bringOrder(request.getOrderId());
+        if (order.getUserId() == null || !order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to the authenticated user");
         }
-        BigDecimal paidAmount = new BigDecimal(amount.getTotal()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal orderAmount = BigDecimal.valueOf(order.getTotalAmount()).setScale(2, RoundingMode.HALF_UP);
-        if (!Objects.equals(transaction.getCustom(), String.valueOf(orderId))
-                || paidAmount.compareTo(orderAmount) != 0) {
-            throw new IllegalStateException("Approved payment does not match the order");
+        long expectedAmount = BigDecimal.valueOf(order.getTotalAmount())
+                .setScale(2, RoundingMode.HALF_UP)
+                .movePointRight(2)
+                .longValueExact();
+        if (!CURRENCY.equals(textValue(razorpayOrder, "currency"))
+                || razorpayOrder.path("amount").asLong(-1) != expectedAmount) {
+            throw new IllegalArgumentException("Razorpay order amount or currency does not match");
         }
-        return orderServiceClient.completeOrder(orderId);
+
+        JsonNode payment = razorpayRestClient.get()
+                .uri("/payments/{paymentId}", request.getRazorpayPaymentId())
+                .retrieve()
+                .body(JsonNode.class);
+        if (payment == null
+                || !request.getRazorpayOrderId().equals(textValue(payment, "order_id"))
+                || payment.path("amount").asLong(-1) != expectedAmount
+                || !CURRENCY.equals(textValue(payment, "currency"))) {
+            throw new IllegalArgumentException("Razorpay payment does not match the order");
+        }
+
+        String paymentStatus = textValue(payment, "status");
+        if ("authorized".equals(paymentStatus)) {
+            payment = razorpayRestClient.post()
+                    .uri("/payments/{paymentId}/capture", request.getRazorpayPaymentId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("amount", expectedAmount, "currency", CURRENCY))
+                    .retrieve()
+                    .body(JsonNode.class);
+            paymentStatus = textValue(payment, "status");
+        }
+        if (!"captured".equals(paymentStatus)) {
+            throw new IllegalStateException("Razorpay payment has not been captured");
+        }
+        return orderServiceClient.completeOrder(request.getOrderId());
     }
 
+    private void verifySignature(PaymentVerificationRequest request) {
+        if (request.getOrderId() == null
+                || isBlank(request.getRazorpayOrderId())
+                || isBlank(request.getRazorpayPaymentId())
+                || isBlank(request.getRazorpaySignature())) {
+            throw new IllegalArgumentException("Payment verification details are required");
+        }
+
+        try {
+            Mac hmac = Mac.getInstance("HmacSHA256");
+            hmac.init(new SecretKeySpec(razorpayKeySecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] digest = hmac.doFinal(
+                    (request.getRazorpayOrderId() + "|" + request.getRazorpayPaymentId())
+                            .getBytes(StandardCharsets.UTF_8)
+            );
+            byte[] expected = HexFormat.of().formatHex(digest).getBytes(StandardCharsets.US_ASCII);
+            byte[] supplied = request.getRazorpaySignature().getBytes(StandardCharsets.US_ASCII);
+            if (!MessageDigest.isEqual(expected, supplied)) {
+                throw new IllegalArgumentException("Invalid Razorpay payment signature");
+            }
+        } catch (IllegalArgumentException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IllegalStateException("Could not verify Razorpay payment signature", exception);
+        }
+    }
+
+    private static String textValue(JsonNode node, String fieldName) {
+        return node == null || !node.hasNonNull(fieldName) ? null : node.get(fieldName).asText();
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
 }

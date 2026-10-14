@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
         Order order = Order.builder()
+                .userId(idUser)
                 .name(user.getName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())

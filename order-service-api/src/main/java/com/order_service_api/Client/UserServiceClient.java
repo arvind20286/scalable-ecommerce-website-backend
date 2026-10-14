@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.order_service_api.Authorization.Config.FeignConfig;
 import com.order_service_api.Model.dto.UserDTO;
 
-@FeignClient(name = "user-service-api", configuration = FeignConfig.class)
+@FeignClient(name = "users-service-api", configuration = FeignConfig.class)
 public interface UserServiceClient {
 
     @GetMapping("/api/users/admin/verification")

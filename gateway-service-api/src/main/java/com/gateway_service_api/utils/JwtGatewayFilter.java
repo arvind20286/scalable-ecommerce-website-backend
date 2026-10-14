@@ -162,6 +162,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered{
                     "POST", List.of(
                             "/api/shopping",
                             "/api/payment/checkout",
+                            "/api/payment/verify",
                             "/api/product/reviews"
                     ),
                     "PUT", List.of("/api/shopping"),
@@ -183,6 +184,5 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered{
         return exchange.getResponse().setComplete();
     }
 }
-
 
 

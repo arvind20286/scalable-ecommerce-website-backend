@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderDTO {
     private Long orderId;
+    private Long userId;
     private String name;
     private String lastName;
     private String email;
